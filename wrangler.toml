@@ -1,0 +1,54 @@
+name = "chympe-booking-backend"
+main = "src/index.js"
+compatibility_date = "2024-11-01"
+
+# Create this KV namespace with:
+#   wrangler kv namespace create BOOKINGS
+# then paste the id it prints below.
+kv_namespaces = [
+  { binding = "BOOKINGS", id = "PASTE_YOUR_NEW_KV_NAMESPACE_ID_HERE" }
+]
+
+# Non-secret vars. TRUE secrets (bot token, webhook secret) are set
+# separately via `wrangler secret put` / the Cloudflare dashboard's
+# "Secret" type and are NOT touched by this file.
+#
+# ⚠️ Everything below IS touched by this file: `wrangler deploy` treats
+# this [vars] block as the complete, authoritative list of plain vars.
+# Any plain ("Text") variable added only in the dashboard and NOT listed
+# here gets wiped out the next time a deploy runs (e.g. on every git
+# push, if your deploy command is `npx wrangler deploy`).
+[vars]
+ALLOWED_ORIGIN = "*"
+# Comma-separated Telegram numeric user ids allowed to drive the admin
+# bot. Get yours by messaging @userinfobot on Telegram.
+ADMIN_USER_IDS = "PASTE_YOUR_TELEGRAM_USER_ID_HERE"
+# Used only for the bot's "👁️ Preview" links. Update once your new
+# GitHub Pages / hosting URL is live.
+SITE_BASE_URL = "https://YOUR-GITHUB-USERNAME.github.io/YOUR-REPO-NAME/"
+# The chat/group the bot posts new bookings + payment receipts to, with
+# Confirm/Reject buttons. Negative id = group/supergroup. Get this by
+# adding your bot to the group and checking getUpdates, or message
+# @userinfobot / @RawDataBot in that chat.
+TELEGRAM_CHAT_ID = "PASTE_YOUR_TELEGRAM_CHAT_ID_HERE"
+# The chat the bot posts site-content edit logs, permanent JSON
+# records, and (until you set up Twilio/Resend) OTP codes to. Can be
+# the same as TELEGRAM_CHAT_ID or your own personal DM with the bot.
+TELEGRAM_ADMIN_CHAT_ID = "PASTE_YOUR_TELEGRAM_ADMIN_CHAT_ID_HERE"
+
+# ---------------------------------------------------------------------
+# SECRETS — set these with `wrangler secret put <NAME>`, NOT here (this
+# [vars] block is plain text and gets committed to git). See
+# SETUP_INSTRUCTIONS.md "Web Admin & Guide Dashboards" section.
+#
+#   ADMIN_PASSWORD     — legacy master password, still works as a
+#                        break-glass admin login
+#   ADMIN_SIGNUP_CODE  — required before anyone can create a NEW admin
+#                        account from the sign-up screen. Share this
+#                        only with people who should get admin access.
+#
+#   OTP delivery (set at least one; Telegram is used automatically as
+#   a fallback if these aren't set yet):
+#   TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM_NUMBER  — SMS
+#   RESEND_API_KEY, RESEND_FROM_EMAIL                          — Email
+# ---------------------------------------------------------------------
