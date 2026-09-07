@@ -6,7 +6,7 @@ compatibility_date = "2024-11-01"
 #   wrangler kv namespace create BOOKINGS
 # then paste the id it prints below.
 kv_namespaces = [
-  { binding = "BOOKINGS", id = "PASTE_YOUR_NEW_KV_NAMESPACE_ID_HERE" }
+  { binding = "BOOKINGS", id = "cd92b965c0ed4581bebe2cb0b941d9cb" }
 ]
 
 # Non-secret vars. TRUE secrets (bot token, webhook secret) are set
@@ -22,7 +22,7 @@ kv_namespaces = [
 ALLOWED_ORIGIN = "*"
 # Comma-separated Telegram numeric user ids allowed to drive the admin
 # bot. Get yours by messaging @userinfobot on Telegram.
-ADMIN_USER_IDS = "PASTE_YOUR_TELEGRAM_USER_ID_HERE"
+ADMIN_USER_IDS = "8550710288"
 # Used only for the bot's "👁️ Preview" links. Update once your new
 # GitHub Pages / hosting URL is live.
 SITE_BASE_URL = "https://YOUR-GITHUB-USERNAME.github.io/YOUR-REPO-NAME/"
@@ -30,11 +30,11 @@ SITE_BASE_URL = "https://YOUR-GITHUB-USERNAME.github.io/YOUR-REPO-NAME/"
 # Confirm/Reject buttons. Negative id = group/supergroup. Get this by
 # adding your bot to the group and checking getUpdates, or message
 # @userinfobot / @RawDataBot in that chat.
-TELEGRAM_CHAT_ID = "PASTE_YOUR_TELEGRAM_CHAT_ID_HERE"
+TELEGRAM_CHAT_ID = "-5500221474"
 # The chat the bot posts site-content edit logs, permanent JSON
 # records, and (until you set up Twilio/Resend) OTP codes to. Can be
 # the same as TELEGRAM_CHAT_ID or your own personal DM with the bot.
-TELEGRAM_ADMIN_CHAT_ID = "PASTE_YOUR_TELEGRAM_ADMIN_CHAT_ID_HERE"
+TELEGRAM_ADMIN_CHAT_ID = "8550710288"
 
 # ---------------------------------------------------------------------
 # SECRETS — set these with `wrangler secret put <NAME>`, NOT here (this
