@@ -185,6 +185,48 @@ export function statusLabel(status) {
 }
 
 // ---------------------------------------------------------------------
+// listing — for the web admin's "conversations" inbox page, which needs
+// every conversation record (not just one visitor's), newest-first.
+// ---------------------------------------------------------------------
+export async function listConversations(env, limit = 150) {
+  const results = [];
+  let cursor;
+  do {
+    const page = await env.BOOKINGS.list({ prefix: "conv:", cursor, limit: 1000 });
+    for (const k of page.keys) {
+      const conv = await kvGet(env, k.name, null);
+      if (conv) results.push(conv);
+    }
+    cursor = page.list_complete ? undefined : page.cursor;
+  } while (cursor && results.length < 2000); // safety cap against runaway pagination
+  results.sort((a, b) => (b.lastActivity || 0) - (a.lastActivity || 0));
+  return results.slice(0, limit);
+}
+
+// ---------------------------------------------------------------------
+// per-conversation message log — Telegram's own scrollback is still the
+// permanent record (see file header), but the web admin's chat inbox
+// needs its own readable copy since it can't render a Telegram chat. A
+// small KV-backed log, same TTL as the conversation itself, kept in
+// sync by forwardToTelegram() below (visitor + AI turns) and by
+// admin-api.js's reply endpoint (human turns typed in the dashboard).
+// ---------------------------------------------------------------------
+const CONVLOG_TTL = 60 * 60 * 24 * 90;
+
+export async function getConvLog(env, sessionId) {
+  if (!sessionId) return [];
+  return kvGet(env, `convlog:${sessionId}`, []);
+}
+
+export async function appendConvLog(env, sessionId, entries) {
+  if (!sessionId || !entries || !entries.length) return;
+  const key = `convlog:${sessionId}`;
+  const log = await kvGet(env, key, []);
+  log.push(...entries);
+  await kvSet(env, key, log.slice(-300), { expirationTtl: CONVLOG_TTL });
+}
+
+// ---------------------------------------------------------------------
 // Telegram message_id -> visitor sessionId (for reply-to-message routing)
 // ---------------------------------------------------------------------
 export async function mapTelegramMessage(env, messageId, sessionId) {
@@ -264,6 +306,10 @@ export async function forwardToTelegram(env, conv, visitorMessage, aiReply, meta
   if (sent && sent.ok) {
     await mapTelegramMessage(env, sent.result.message_id, conv.sessionId);
   }
+
+  const logEntries = [{ from: "visitor", text: visitorMessage, ts: Date.now() }];
+  if (aiReply) logEntries.push({ from: "ai", text: aiReply, ts: Date.now() });
+  await appendConvLog(env, conv.sessionId, logEntries).catch(() => {});
 }
 
 function escapeHtml(s) {

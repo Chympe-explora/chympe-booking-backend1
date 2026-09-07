@@ -115,6 +115,33 @@ export async function tgEditMessageMediaDocument(env, chatId, messageId, filenam
   return r.json();
 }
 
+// Raw-bytes upload variants — used by the web admin's image/video upload
+// endpoints (admin-api.js), where the file arrives as base64 from the
+// browser rather than already existing as a Telegram file_id.
+export async function tgSendPhotoBytes(env, chatId, bytes, filename, mimeType, caption) {
+  const form = new FormData();
+  form.append("chat_id", chatId);
+  if (caption) {
+    form.append("caption", caption);
+    form.append("parse_mode", "HTML");
+  }
+  form.append("photo", new Blob([bytes], { type: mimeType || "image/jpeg" }), filename || "photo.jpg");
+  const r = await fetch(`${API(env)}/sendPhoto`, { method: "POST", body: form });
+  return r.json();
+}
+
+export async function tgSendVideoBytes(env, chatId, bytes, filename, mimeType, caption) {
+  const form = new FormData();
+  form.append("chat_id", chatId);
+  if (caption) {
+    form.append("caption", caption);
+    form.append("parse_mode", "HTML");
+  }
+  form.append("video", new Blob([bytes], { type: mimeType || "video/mp4" }), filename || "video.mp4");
+  const r = await fetch(`${API(env)}/sendVideo`, { method: "POST", body: form });
+  return r.json();
+}
+
 export async function tgPinMessage(env, chatId, messageId) {
   return tg(env, "pinChatMessage", { chat_id: chatId, message_id: messageId, disable_notification: true });
 }
