@@ -368,8 +368,17 @@ export async function getGuideBookingIds(env, guideId) {
 // lookup key: `guidelogin:<phone-or-email>` -> guideId.
 // ---------------------------------------------------------------------
 
+// Phone numbers get typed differently every time (spaces, dashes,
+// parens, with/without a leading +) — a raw trim+lowercase treats
+// "+91 98765 43210" (typed at signup) and "+919876543210" (typed at
+// login) as two different keys and login silently fails even though
+// it's the same guide. Strip everything except digits and a leading
+// + so both collapse to the same key. Emails are left alone (already
+// normalized by lowercasing) since '@' rules out the phone branch.
 function loginKey(identifier) {
-  return `guidelogin:${String(identifier).trim().toLowerCase()}`;
+  const s = String(identifier).trim().toLowerCase();
+  const normalized = s.includes("@") ? s : s.replace(/[^\d+]/g, "");
+  return `guidelogin:${normalized}`;
 }
 
 export async function findGuideByLoginIdentifier(env, identifier) {
